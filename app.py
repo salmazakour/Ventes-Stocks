@@ -15,36 +15,20 @@ st.set_page_config(page_title="Analyse ventes & stock", layout="wide")
 st.sidebar.title("📌 Menu")
 page = st.sidebar.radio("Navigation", ["Top Produits", "Ruptures", "Evolution"])
 
+sales_file = st.sidebar.file_uploader("Télécharger le fichier VENTES", type=['csv', 'xlsx', 'xls'])
+stock_file = st.sidebar.file_uploader("Télécharger le fichier STOCK", type=['csv', 'xlsx', 'xls'])
 
-rapport_dir = "rapport"
-files = [f for f in os.listdir(rapport_dir) if f.endswith(('.xlsx', '.csv'))]
-
-if not files:
-    st.warning("Aucun fichier trouvé dans le dossier `rapport/`.")
+# Vérifier que les deux fichiers sont chargés
+if sales_file is None or stock_file is None:
+    st.warning("Veuillez importer les fichiers de ventes et de stock pour continuer.")
     st.stop()
 
-# Ajouter une option vide en début de liste
-files_with_empty = ["-- Aucun --"] + files
-
-# Utiliser la sidebar et la liste avec option vide
-sales_file = st.sidebar.selectbox("📄 Fichier VENTES", files_with_empty, index=0)
-stock_file = st.sidebar.selectbox("📄 Fichier STOCK", files_with_empty, index=0)
-
-# Vérifier que les fichiers ont bien été choisis
-if sales_file == "-- Aucun --" or stock_file == "-- Aucun --":
-    st.warning("Bonjour, Veuillez sélectionner les fichiers de ventes et de stock.")
-    st.stop()
-
-sales_path = os.path.join(rapport_dir, sales_file)
-stock_path = os.path.join(rapport_dir, stock_file)
-
-sales, stock = load_data(sales_path, stock_path)
+# Charger les données
+sales, stock = load_data(sales_file, stock_file)
 
 if sales.empty or stock.empty:
     st.warning("⚠️ Les fichiers sont vides ou mal formatés.")
     st.stop()
-
-
 
 
 # Harmoniser les colonnes pour le filtre
@@ -228,3 +212,4 @@ elif page == "Evolution":
             st.pyplot(fig)
         else:
             st.warning("⚠️ Aucune donnée trouvée pour ce produit dans la période sélectionnée.")
+
